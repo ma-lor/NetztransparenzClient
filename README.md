@@ -6,7 +6,7 @@ It handles authentication, loads the CSV data and transforms it into a [pandas](
 This client is not yet published as a package. To use it you have to copy the file to your workspace and install the packages in ['requirements.txt'](./requirements.txt) 
 
 ## Example
-To use the Netztranaparenz API one has to create a free account, see [https://api-portal.netztransparenz.de/](https://api-portal.netztransparenz.de/).
+To use the Netztransparenz API one has to create a free account, see [https://api-portal.netztransparenz.de/](https://api-portal.netztransparenz.de/).
 With the account you get the credentials that are needed in the next step.
 
 ### Basic usage
@@ -48,7 +48,7 @@ You can specify the timeframe you want data for:
 ```
 
 ### Transform dates
-For some of the datasets, dates are split up into five columns witch makes them hard to sort. If you set the tranform_dates flag to true they are converted to two timestamps. 
+For some of the datasets, dates are split up into five columns which makes them hard to sort. If you set the transform_dates flag to true they are converted to two timestamps. 
 Also, "von" is turned into the index.
 
 ```
