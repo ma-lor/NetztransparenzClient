@@ -11,7 +11,8 @@ With the account you get the credentials that are needed in the next step.
 
 ### Basic usage
 ```
->>> client = NetztransparenzClient("YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET")
+>>> import netztransparenz as nt
+>>> client = nt.NetztransparenzClient("YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET")
 
 #optional: check API status 
 >>> client.check_health()
