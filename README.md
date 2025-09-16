@@ -2,8 +2,10 @@
 This is a small python client to access the data of the german [Netztransparenz portal](https://www.netztransparenz.de/).
 It handles authentication, loads the CSV data and transforms it into a [pandas](https://github.com/pandas-dev/pandas) dataframe with some optional format changes.
 
+This is an unofficial client, the makers of this library are not affiliated with NETZTRANSPARENZ.DE.
+
 ## Installation
-This client is not yet published as a package. To use it you have to copy the file to your workspace and install the packages in ['requirements.txt'](./requirements.txt) 
+Install from Pypi with 'pip install netztransparenz"
 
 ## Example
 To use the Netztransparenz API one has to create a free account, see [https://api-portal.netztransparenz.de/](https://api-portal.netztransparenz.de/).

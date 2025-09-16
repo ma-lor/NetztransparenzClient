@@ -109,6 +109,7 @@ class NetztransparenzClient:
             start_of_data = dt_begin.strftime(_api_date_format)
             start_of_data = start_of_data if start_of_data > earliest_data else earliest_data
             end_of_data = dt_end.strftime(_api_date_format)
+            url = f"{_API_BASE_URL}/{resource_url}/{start_of_data}/{end_of_data}"
 
         response = requests.get(url, headers = {'Authorization': 'Bearer {}'.format(self.token)})
         response.raise_for_status()
@@ -127,7 +128,7 @@ class NetztransparenzClient:
             df = df.drop(["datum", "zeitzone"], axis=1).set_index("von")
         return df
 
-    def _basic_read_vermarktung(self, resource_url, earliest_data, dt_begin: dt.datetime = None, dt_end: dt.datetime = None):
+    def _basic_read_vermarktung(self, resource_url, earliest_data, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates = False):
         """
         Internal method to read data in the format of most /vermarktung dataseries.
         Target format is: Dates separated in "datum", "von", "bis", "zeitzone".
