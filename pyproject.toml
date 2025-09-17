@@ -21,3 +21,11 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/ma-lor/NetztransparenzClient"
 Issues = "https://github.com/ma-lor/NetztransparenzClient/issues"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]
+
+[tool.pytest.ini_options]
+markers = ["api_access"]

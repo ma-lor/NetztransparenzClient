@@ -148,6 +148,7 @@ class NetztransparenzClient:
             start_of_data = dt_begin.strftime(_api_date_format)
             start_of_data = start_of_data if start_of_data > earliest_data else earliest_data
             end_of_data = dt_end.strftime(_api_date_format)
+            url = f"{_API_BASE_URL}/{resource_url}/{start_of_data}/{end_of_data}"
 
         response = requests.get(url, headers = {'Authorization': 'Bearer {}'.format(self.token)})
         response.raise_for_status()
@@ -301,8 +302,8 @@ class NetztransparenzClient:
             )
         
         if(transform_dates):    
-            df["von"] = pd.to_datetime(df["Datum"] + " " + df["von"] + " " + df["Zeitzone von"], format=csv_date_format, utc=True)
-            df["bis"] = pd.to_datetime(df["Datum"] + " " + df["bis"] + " " + df["Zeitzone bis"], format=csv_date_format, utc=True)
+            df["von"] = pd.to_datetime(df["Datum"] + " " + df["von"] + " " + df["Zeitzone von"], format=_csv_date_format, utc=True)
+            df["bis"] = pd.to_datetime(df["Datum"] + " " + df["bis"] + " " + df["Zeitzone bis"], format=_csv_date_format, utc=True)
             df = df.drop(["Datum", "Zeitzone von", "Zeitzone bis"], axis=1).set_index("von")
 
         return df
@@ -337,8 +338,8 @@ class NetztransparenzClient:
             )
         
         if(transform_dates):    
-            df["von"] = pd.to_datetime(df["Datum"] + " " + df["von"] + " " + df["Zeitzone von"], format=csv_date_format, utc=True)
-            df["bis"] = pd.to_datetime(df["Datum"] + " " + df["bis"] + " " + df["Zeitzone bis"], format=csv_date_format, utc=True)
+            df["von"] = pd.to_datetime(df["Datum"] + " " + df["von"] + " " + df["Zeitzone von"], format=_csv_date_format, utc=True)
+            df["bis"] = pd.to_datetime(df["Datum"] + " " + df["bis"] + " " + df["Zeitzone bis"], format=_csv_date_format, utc=True)
             df = df.drop(["Datum", "Zeitzone von", "Zeitzone bis"], axis=1).set_index("von")
 
         return df
