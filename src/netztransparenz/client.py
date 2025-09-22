@@ -47,7 +47,7 @@ class NetztransparenzClient:
         response = requests.get(url, headers = {'Authorization': 'Bearer {}'.format(self.token)})
         return response.text
 
-    def _basic_read_nt(self, resource_url, earliest_data, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, 
+    def _basic_read_nt(self, resource_url, earliest_data, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, 
         transform_dates=False):
         """
         Internal method to read data in one of the common formats of th nt portal.
@@ -89,7 +89,7 @@ class NetztransparenzClient:
         
         return df
     
-    def _basic_read_nrvsaldo(self, resource_url, earliest_data, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates=False):
+    def _basic_read_nrvsaldo(self, resource_url, earliest_data, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
         Internal method to read data in the format of most /nrvsaldo dataseries.
         Target format is: Dates separated in "datum", "von", "bis", "zeitzone".
@@ -128,7 +128,7 @@ class NetztransparenzClient:
             df = df.drop(["datum", "zeitzone"], axis=1).set_index("von")
         return df
 
-    def _basic_read_vermarktung(self, resource_url, earliest_data, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates = False):
+    def _basic_read_vermarktung(self, resource_url, earliest_data, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates = False):
         """
         Internal method to read data in the format of most /vermarktung dataseries.
         Target format is: Dates separated in "datum", "von", "bis", "zeitzone".
@@ -168,7 +168,7 @@ class NetztransparenzClient:
 
         return df
 
-    def hochrechnung_solar(self, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates=False):
+    def hochrechnung_solar(self, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
         Return a pandas Dataframe with data of the endpoint /hochrechnung/Solar.
         If either dt_begin or dt_end is None, all available data will be queried.
@@ -181,7 +181,7 @@ class NetztransparenzClient:
         """
         return self._basic_read_nt("data/hochrechnung/Solar", "2011-03-31T22:00:00", dt_begin, dt_end, transform_dates)
 
-    def hochrechnung_wind(self, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates=False):
+    def hochrechnung_wind(self, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
         Return a pandas Dataframe with data of the endpoint /hochrechnung/Wind.
         If either dt_begin or dt_end is None, all available data will be queried.
@@ -194,7 +194,7 @@ class NetztransparenzClient:
         """
         return self._basic_read_nt("data/hochrechnung/Wind", "2011-03-31T22:00:00", dt_begin, dt_end, transform_dates)
 
-    def online_hochrechnung_windonshore(self, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates=False):
+    def online_hochrechnung_windonshore(self, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
         Return a pandas Dataframe with data of the endpoint /OnlineHochrechnung/Windonshore.
         If either dt_begin or dt_end is None, all available data will be queried.
@@ -207,7 +207,7 @@ class NetztransparenzClient:
         """
         return self._basic_read_nt("data/OnlineHochrechnung/Windonshore", "2011-12-31T23:00:00", dt_begin, dt_end, transform_dates)
 
-    def online_hochrechnung_windoffshore(self, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates=False):
+    def online_hochrechnung_windoffshore(self, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
         Return a pandas Dataframe with data of the endpoint /OnlineHochrechnung/Windoffshore.
         If either dt_begin or dt_end is None, all available data will be queried.
@@ -220,7 +220,7 @@ class NetztransparenzClient:
         """
         return self._basic_read_nt("data/OnlineHochrechnung/Windoffshore", "2011-12-31T23:00:00", dt_begin, dt_end, transform_dates)
 
-    def online_hochrechnung_solar(self, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates=False):
+    def online_hochrechnung_solar(self, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
         Return a pandas Dataframe with data of the endpoint /OnlineHochrechnung/Solar.
         If either dt_begin or dt_end is None, all available data will be queried.
@@ -233,7 +233,7 @@ class NetztransparenzClient:
         """
         return self._basic_read_nt("data/OnlineHochrechnung/Solar", "2011-12-31T23:00:00", dt_begin, dt_end, transform_dates)
 
-    def vermarktung_differenz_einspeiseprognose(self, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates=False):
+    def vermarktung_differenz_einspeiseprognose(self, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
         Return a pandas Dataframe with data of the endpoint /vermarktung/DifferenzEinspeiseprognose.
         If either dt_begin or dt_end is None, all available data will be queried.
@@ -246,7 +246,7 @@ class NetztransparenzClient:
         """
         return self._basic_read_vermarktung("data/vermarktung/DifferenzEinspeiseprognose", "2011-04-01T00:00:00", dt_begin, dt_end, transform_dates)
 
-    def vermarktung_inanspruchnahme_ausgleichsenergie(self, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates=False):
+    def vermarktung_inanspruchnahme_ausgleichsenergie(self, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
         Return a pandas Dataframe with data of the endpoint /vermarktung/InanspruchnahmeAusgleichsenergie.
         If either dt_begin or dt_end is None, all available data will be queried.
@@ -259,7 +259,7 @@ class NetztransparenzClient:
         """
         return self._basic_read_vermarktung("data/vermarktung/InanspruchnahmeAusgleichsenergie", "2011-04-01T00:00:00", dt_begin, dt_end, transform_dates)
 
-    def vermarktung_untertaegige_strommengen(self, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates=False):
+    def vermarktung_untertaegige_strommengen(self, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
         Return a pandas Dataframe with data of the endpoint /vermarktung/DifferenzEinspeiseprognose.
         If either dt_begin or dt_end is None, all available data will be queried.
@@ -272,7 +272,7 @@ class NetztransparenzClient:
         """
         return self._basic_read_vermarktung("data/vermarktung/DifferenzEinspeiseprognose", "2011-04-01T00:00:00", dt_begin, dt_end, transform_dates)
     
-    def prognose_solar(self, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates=False):
+    def prognose_solar(self, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
         Return a pandas Dataframe with data of the endpoint /prognose/Solar.
         If either dt_begin or dt_end is None, all available data will be queried.
@@ -308,7 +308,7 @@ class NetztransparenzClient:
 
         return df
 
-    def prognose_wind(self, dt_begin: dt.datetime = None, dt_end: dt.datetime = None, transform_dates=False):
+    def prognose_wind(self, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
         Return a pandas Dataframe with data of the endpoint /prognose/Wind.
         If either dt_begin or dt_end is None, all available data will be queried.
