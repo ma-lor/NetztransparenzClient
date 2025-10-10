@@ -64,7 +64,7 @@ class NetztransparenzClient:
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         url = f"{_API_BASE_URL}/{resource_url}"
-        if((dt_begin != None) & (dt_end != None)):
+        if((dt_begin != None) and (dt_end != None)):
             start_of_data = dt_begin.strftime(_api_date_format)
             start_of_data = start_of_data if start_of_data > earliest_data else earliest_data
             end_of_data = dt_end.strftime(_api_date_format)
@@ -105,7 +105,7 @@ class NetztransparenzClient:
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         url = f"{_API_BASE_URL}/{resource_url}"
-        if((dt_begin != None) & (dt_end != None)):
+        if((dt_begin != None) and (dt_end != None)):
             start_of_data = dt_begin.strftime(_api_date_format)
             start_of_data = start_of_data if start_of_data > earliest_data else earliest_data
             end_of_data = dt_end.strftime(_api_date_format)
@@ -144,7 +144,7 @@ class NetztransparenzClient:
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         url = f"{_API_BASE_URL}/{resource_url}"
-        if((dt_begin != None) & (dt_end != None)):
+        if((dt_begin != None) and (dt_end != None)):
             start_of_data = dt_begin.strftime(_api_date_format)
             start_of_data = start_of_data if start_of_data > earliest_data else earliest_data
             end_of_data = dt_end.strftime(_api_date_format)
@@ -166,7 +166,7 @@ class NetztransparenzClient:
             df["bis"] = df["bis"].where(df["bis"].dt.time != dt.time(0,0), df["bis"] + dt.timedelta(days=1))
             df = df.drop(["Datum", "Zeitzone von", "Zeitzone bis"], axis=1).set_index("von")
 
-        return df
+        return df        
 
     def hochrechnung_solar(self, dt_begin: dt.datetime | None = None, dt_end: dt.datetime | None = None, transform_dates=False):
         """
@@ -284,7 +284,7 @@ class NetztransparenzClient:
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         url = f"{_API_BASE_URL}/data/prognose/Solar/"
-        if((dt_begin != None) & (dt_end != None)):
+        if((dt_begin != None) and (dt_end != None)):
             #Prognose Solar contains historical data, adapt dates to the relevant timeframe
             start_of_data = dt_begin.strftime(_api_date_format)
             start_of_data = start_of_data if start_of_data > "2011-03-31T22:00:00" else "2011-03-31T22:00:00"
@@ -320,7 +320,7 @@ class NetztransparenzClient:
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         url = f"{_API_BASE_URL}/data/prognose/Wind"
-        if((dt_begin != None) & (dt_end != None)):
+        if((dt_begin != None) and (dt_end != None)):
             #Prognose Wind contains historical data, adapt dates to the relevant timeframe
             start_of_data = dt_begin.strftime(_api_date_format)
             start_of_data = start_of_data if start_of_data > "2011-03-31T22:00:00" else "2011-03-31T22:00:00"
