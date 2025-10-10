@@ -56,14 +56,19 @@ def test_vermarktung_untertaegige_strommengen(client):
     assert result["bis"].count() == QUARTERS_IN_MONTH
 
 @pytest.mark.api_access
+def test_redispatch(client):
+    result = client.redispatch(dt.datetime(2022, 1, 1, 0 ,0), dt.datetime(2022, 1, 31), True)
+    assert result["BEGINN"].count() == 1523
+
+@pytest.mark.api_access
 def test_prognose_solar(client):
     result = client.prognose_solar(START, END, True)
-    assert result["bis"].count() == 2976
+    assert result["bis"].count() == QUARTERS_IN_MONTH
 
 @pytest.mark.api_access
 def test_prognose_wind(client):
     result = client.prognose_wind(START, END, True)
-    assert result["bis"].count() == 2976
+    assert result["bis"].count() == QUARTERS_IN_MONTH
 
 
 
