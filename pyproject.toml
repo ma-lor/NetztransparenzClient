@@ -25,7 +25,8 @@ Issues = "https://github.com/ma-lor/NetztransparenzClient/issues"
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
+    "requests-mock>=1.12.1",
 ]
 
 [tool.pytest.ini_options]
-markers = ["api_access"]
+markers = ["api_access", "unmarked"]

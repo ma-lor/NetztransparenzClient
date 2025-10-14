@@ -77,7 +77,7 @@ class NetztransparenzClient:
             header=0,
             decimal=",",
             thousands=".",
-            na_values=["N.A."]
+            na_values=["N.A.", "N.E."]
             )
 
         if(transform_dates):    

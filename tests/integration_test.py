@@ -1,8 +1,8 @@
-from .context import netztransparenz as nt
-
 import os
 import datetime as dt
 import pytest
+
+import netztransparenz as nt
 
 START = dt.datetime(2020, 1, 1, 0, 0)
 END = dt.datetime(2020, 2, 1, 0, 0)
