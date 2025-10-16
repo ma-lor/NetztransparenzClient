@@ -24,6 +24,10 @@ jobs:
     # Install uv
     - name: Install uv
       uses: astral-sh/setup-uv@v3
+    
+    # Run unit tests
+    - name: Run unit tests
+      run: uv run pytest -m unmarked
 
     # Build the package
     - name: Build Package
