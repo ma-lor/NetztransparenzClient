@@ -16,7 +16,7 @@ def token(requests_mock):
 def client(token):
     id = "PLACEHOLDER_ID"
     secret = "PLACEHOLDER_SECRET"
-    return nt.NetztransparenzClient(id, secret)
+    return nt.HochrechnungClient(id, secret)
 
 def test_hochrechnung_solar(client, requests_mock):
     body="""Datum;von;Zeitzone von;bis;Zeitzone bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)
@@ -58,3 +58,19 @@ def test_online_hochrechnung_solar(client, requests_mock):
     requests_mock.get(f"{_API_BASE_URL}/data/OnlineHochrechnung/Solar/2020-01-01T00:00:00/2020-02-01T00:00:00", text=body)
     result = client.online_hochrechnung_solar(START, END, True)
     assert result["50Hertz (MW)"].iloc[0] == 727.21
+
+def test_prognose_solar(client, requests_mock):
+    body="""Datum;von;Zeitzone von;bis;Zeitzone bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)
+2022-12-01;07:45;UTC;08:00;UTC;47,090;96,000;300,940;152,000"""
+
+    requests_mock.get(f"{_API_BASE_URL}/data/prognose/Solar/2020-01-01T00:00:00/2020-02-01T00:00:00", text=body)
+    result = client.prognose_solar(START, END, True)
+    assert result["50Hertz (MW)"].iloc[0] == 47.09
+
+def test_prognose_wind(client, requests_mock):
+    body="""Datum;von;Zeitzone von;bis;Zeitzone bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)
+2022-12-01;00:00;UTC;00:15;UTC;5,442;5,000;5,000;2,000"""
+
+    requests_mock.get(f"{_API_BASE_URL}/data/prognose/Wind/2020-01-01T00:00:00/2020-02-01T00:00:00", text=body)
+    result = client.prognose_wind(START, END, True)
+    assert result["50Hertz (MW)"].iloc[0] == 5.442
