@@ -10,7 +10,9 @@ from .hochrechnung_client import HochrechnungClient
 from .dienstleistungen_client import DienstleistungenClient
 from .nrvsaldo_client import NrvSaldoClient
 
-class NetztransparenzClient(VermarktungClient, HochrechnungClient, DienstleistungenClient, NrvSaldoClient):
 
+class NetztransparenzClient(
+    VermarktungClient, HochrechnungClient, DienstleistungenClient, NrvSaldoClient
+):
     def __init__(self, client_id, client_pass):
         super().__init__(client_id, client_pass)

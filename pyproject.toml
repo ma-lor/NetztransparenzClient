@@ -26,6 +26,7 @@ Issues = "https://github.com/ma-lor/NetztransparenzClient/issues"
 dev = [
     "pytest>=8.4.2",
     "requests-mock>=1.12.1",
+    "ruff>=0.14.0",
 ]
 
 [tool.pytest.ini_options]
