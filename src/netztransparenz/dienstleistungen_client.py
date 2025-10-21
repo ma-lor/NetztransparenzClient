@@ -3,6 +3,8 @@ Client for all Endpoints of the "Systemdienstleistungen" Group
 """
 
 from netztransparenz.base_client import BaseNtClient
+from netztransparenz.constants import endpoints
+
 import requests
 import datetime as dt
 import io
@@ -11,9 +13,6 @@ import pandas as pd
 
 
 class DienstleistungenClient(BaseNtClient):
-    def __init__(self, client_id, client_pass):
-        super().__init__(client_id, client_pass)
-
     def _basic_read_systemdienstleistungen(
         self,
         resource_url,
@@ -29,15 +28,30 @@ class DienstleistungenClient(BaseNtClient):
         If either dt_begin or dt_end is None, all available data will be queried.
 
             resource_url -- url of the endpoint without the base url and without leading or trailing "/"
-            earliest_data -- first datapoint in the source collection
-            dt_begin -- datetime object for start of data in UTC (no values before: 2011-03-31T22:00:00)
+            dt_begin -- datetime object for start of data in UTC
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
                                columns "BEGINN" and "ENDE" that contain fully qualified timestamps. (default: False)
         """
+        if not self._check_preconditions(
+            dt_begin, endpoints[f"/{resource_url}"]["first_data"], dt_end
+        ):
+            return self._return_empty_frame(f"/{resource_url}", transform_dates)
+
         url = f"{self._API_BASE_URL}/data/{resource_url}"
         if (dt_begin is not None) and (dt_end is not None):
+            if (dt_begin + self.max_query_distance) < dt_end:
+                # split into multiple api calls
+                timeframes = self._split_timeframe(dt_begin, dt_end)
+                dataframes = []
+                for timeframe in timeframes:
+                    dataframes.append(
+                        self._basic_read_systemdienstleistungen(
+                            resource_url, timeframe[0], timeframe[1], transform_dates
+                        )
+                    )
+                return pd.concat(dataframes)
             start_of_data = dt_begin.strftime(self._api_date_format)
             end_of_data = dt_end.strftime(self._api_date_format)
             url = f"{self._API_BASE_URL}/data/{resource_url}/{start_of_data}/{end_of_data}"
@@ -97,18 +111,33 @@ class DienstleistungenClient(BaseNtClient):
         If either dt_begin or dt_end is None, all available data will be queried.
 
             resource_url -- url of the endpoint without the base url and without leading or trailing "/"
-            earliest_data -- first datapoint in the source collection
-            dt_begin -- datetime object for start of data in UTC (no values before: 2011-03-31T22:00:00)
+            dt_begin -- datetime object for start of data in UTC
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
                                columns "BEGINN" and "ENDE" that contain fully qualified timestamps. (default: False)
         """
+        if not self._check_preconditions(
+            dt_begin, endpoints[f"/{resource_url}"]["first_data"], dt_end
+        ):
+            return self._return_empty_frame(f"/{resource_url}", transform_dates)
+
         url = f"{self._API_BASE_URL}/data/{resource_url}"
         if (dt_begin is not None) and (dt_end is not None):
+            if (dt_begin + self.max_query_distance) < dt_end:
+                # split into multiple api calls
+                timeframes = self._split_timeframe(dt_begin, dt_end)
+                dataframes = []
+                for timeframe in timeframes:
+                    dataframes.append(
+                        self._basic_read_abregelung(
+                            resource_url, timeframe[0], timeframe[1], transform_dates
+                        )
+                    )
+                return pd.concat(dataframes)
             start_of_data = dt_begin.strftime(self._api_date_format)
             end_of_data = dt_end.strftime(self._api_date_format)
-            url = f"{self._API_BASE_URL}/data/{resource_url}/{start_of_data}/{end_of_data}"
+            url = f"{url}/{start_of_data}/{end_of_data}"
 
         response = requests.get(
             url, headers={"Authorization": "Bearer {}".format(self.token)}
@@ -147,7 +176,7 @@ class DienstleistungenClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint /redispatch.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2021-10-01T00:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2021-01-01T00:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
@@ -167,7 +196,7 @@ class DienstleistungenClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint /Kapazitaetsreserve.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2021-10-01T00:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2021-01-01T00:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
@@ -187,7 +216,7 @@ class DienstleistungenClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint /VorhaltungkRD.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2021-10-01T00:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2025-01-01T00:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
@@ -207,7 +236,7 @@ class DienstleistungenClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint /AusgewieseneABSM.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2021-10-01T00:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2024-09-30T22:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
@@ -227,7 +256,7 @@ class DienstleistungenClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint /ZugeteilteABSM.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2021-10-01T00:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2024-09-30T22:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
@@ -247,7 +276,7 @@ class DienstleistungenClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint /Erzeugungsverbot.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2021-10-01T00:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2024-09-30T22:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two

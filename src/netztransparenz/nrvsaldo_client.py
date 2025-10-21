@@ -3,6 +3,7 @@ Client for all Endpoints of the "NrvSaldo/" Group
 """
 
 from netztransparenz.base_client import BaseNtClient
+from netztransparenz.constants import endpoints
 import requests
 import datetime as dt
 import io
@@ -13,9 +14,6 @@ _nrvsaldo_date_format = "%d.%m.%Y %H:%M %Z"
 
 
 class NrvSaldoClient(BaseNtClient):
-    def __init__(self, client_id, client_pass):
-        super().__init__(client_id, client_pass)
-
     def _basic_read_nrvsaldo(
         self,
         resource_url,
@@ -37,8 +35,24 @@ class NrvSaldoClient(BaseNtClient):
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
+        if not self._check_preconditions(
+            dt_begin, endpoints[f"/{resource_url}"]["first_data"], dt_end
+        ):
+            return self._return_empty_frame(f"/{resource_url}", transform_dates)
+
         url = f"{self._API_BASE_URL}/data/{resource_url}"
         if (dt_begin is not None) and (dt_end is not None):
+            if (dt_begin + self.max_query_distance) < dt_end:
+                # split into multiple api calls
+                timeframes = self._split_timeframe(dt_begin, dt_end)
+                dataframes = []
+                for timeframe in timeframes:
+                    dataframes.append(
+                        self._basic_read_nrvsaldo(
+                            resource_url, timeframe[0], timeframe[1], transform_dates
+                        )
+                    )
+                return pd.concat(dataframes)
             start_of_data = dt_begin.strftime(self._api_date_format)
             end_of_data = dt_end.strftime(self._api_date_format)
             url = url + f"/{start_of_data}/{end_of_data}"
@@ -75,9 +89,22 @@ class NrvSaldoClient(BaseNtClient):
         """
         Return a pandas Dataframe with data of the endpoint /TrafficLight.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2021-10-01T00:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2021-09-21T22:00:00)
             dt_end -- datetime object for end of data in UTC
         """
+        if not self._check_preconditions(
+            dt_begin, endpoints["/TrafficLight"]["first_data"], dt_end
+        ):
+            return self._return_empty_frame("/TrafficLight", False)
+
+        if (dt_begin + self.max_query_distance) < dt_end:
+            # split into multiple api calls
+            timeframes = self._split_timeframe(dt_begin, dt_end)
+            dataframes = []
+            for timeframe in timeframes:
+                dataframes.append(self.traffic_light(timeframe[0], timeframe[1]))
+            return pd.concat(dataframes)
+
         url = f"{self._API_BASE_URL}/data/TrafficLight/{dt_begin.strftime(self._api_date_format)}/{dt_end.strftime(self._api_date_format)}"
 
         response = requests.get(
@@ -188,7 +215,7 @@ class NrvSaldoClient(BaseNtClient):
         self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /Nrvsaldo/AktivierteSRL/Betrieblich/.
+        Return a pandas Dataframe with data of the endpoint /NrvSaldo/AktivierteSRL/Betrieblich/.
 
             dt_begin -- datetime object for start of data in UTC
             dt_end -- datetime object for end of data in UTC
@@ -197,14 +224,14 @@ class NrvSaldoClient(BaseNtClient):
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         return self._basic_read_nrvsaldo(
-            "Nrvsaldo/AktivierteSRL/Betrieblich", dt_begin, dt_end, transform_dates
+            "NrvSaldo/AktivierteSRL/Betrieblich", dt_begin, dt_end, transform_dates
         )
 
     def nrvsaldo_aktivierte_srl_qualitaetsgesichert(
         self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /Nrvsaldo/AktivierteSRL/Qualitaetsgesichert/.
+        Return a pandas Dataframe with data of the endpoint /NrvSaldo/AktivierteSRL/Qualitaetsgesichert/.
 
             dt_begin -- datetime object for start of data in UTC
             dt_end -- datetime object for end of data in UTC
@@ -213,7 +240,7 @@ class NrvSaldoClient(BaseNtClient):
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         return self._basic_read_nrvsaldo(
-            "Nrvsaldo/AktivierteSRL/Qualitaetsgesichert",
+            "NrvSaldo/AktivierteSRL/Qualitaetsgesichert",
             dt_begin,
             dt_end,
             transform_dates,
@@ -344,7 +371,7 @@ class NrvSaldoClient(BaseNtClient):
         self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /NrvSaldo/SrlMolAbweichungen/betrieblich/.
+        Return a pandas Dataframe with data of the endpoint /NrvSaldo/SrlMolAbweichungen/Betrieblich/.
 
             dt_begin -- datetime object for start of data in UTC
             dt_end -- datetime object for end of data in UTC
@@ -352,8 +379,28 @@ class NrvSaldoClient(BaseNtClient):
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
-        url = f"{self._API_BASE_URL}/data/NrvSaldo/SrlMolAbweichungen/betrieblich"
+        if not self._check_preconditions(
+            dt_begin,
+            endpoints["/NrvSaldo/SrlMolAbweichungen/Betrieblich"]["first_data"],
+            dt_end,
+        ):
+            return self._return_empty_frame(
+                "/NrvSaldo/SrlMolAbweichungen/Betrieblich", transform_dates
+            )
+
+        url = f"{self._API_BASE_URL}/data/NrvSaldo/SrlMolAbweichungen/Betrieblich"
         if (dt_begin is not None) and (dt_end is not None):
+            if (dt_begin + self.max_query_distance) < dt_end:
+                # split into multiple api calls
+                timeframes = self._split_timeframe(dt_begin, dt_end)
+                dataframes = []
+                for timeframe in timeframes:
+                    dataframes.append(
+                        self.nrvsaldo_srl_mol_abweichungen_betrieblich(
+                            timeframe[0], timeframe[1], transform_dates
+                        )
+                    )
+                return pd.concat(dataframes)
             start_of_data = dt_begin.strftime(self._api_date_format)
             end_of_data = dt_end.strftime(self._api_date_format)
             url = url + f"/{start_of_data}/{end_of_data}"

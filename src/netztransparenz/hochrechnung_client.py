@@ -3,6 +3,7 @@ Client for all /<online>hochrechnung/ and /prognose/ Endpoints
 """
 
 from netztransparenz.base_client import BaseNtClient
+from netztransparenz.constants import endpoints
 import requests
 import datetime as dt
 import io
@@ -13,9 +14,6 @@ _csv_date_format = "%Y-%m-%d %H:%M %Z"
 
 
 class HochrechnungClient(BaseNtClient):
-    def __init__(self, client_id, client_pass):
-        super().__init__(client_id, client_pass)
-
     def _basic_read_nt(
         self,
         resource_url,
@@ -37,11 +35,16 @@ class HochrechnungClient(BaseNtClient):
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
-        url = f"{self._API_BASE_URL}/{resource_url}"
+        if not self._check_preconditions(
+            dt_begin, endpoints[f"/{resource_url}"]["first_data"], dt_end
+        ):
+            return self._return_empty_frame(f"/{resource_url}", transform_dates)
+
+        url = f"{self._API_BASE_URL}/data/{resource_url}"
         if (dt_begin is not None) and (dt_end is not None):
             start_of_data = dt_begin.strftime(self._api_date_format)
             end_of_data = dt_end.strftime(self._api_date_format)
-            url = f"{self._API_BASE_URL}/{resource_url}/{start_of_data}/{end_of_data}"
+            url = f"{url}/{start_of_data}/{end_of_data}"
 
         response = requests.get(
             url, headers={"Authorization": "Bearer {}".format(self.token)}
@@ -93,8 +96,9 @@ class HochrechnungClient(BaseNtClient):
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
+        self._check_preconditions(dt_begin, dt.datetime(2011, 3, 31, 22), dt_end)
         return self._basic_read_nt(
-            "data/hochrechnung/Solar", dt_begin, dt_end, transform_dates
+            "hochrechnung/Solar", dt_begin, dt_end, transform_dates
         )
 
     def hochrechnung_wind(
@@ -113,8 +117,9 @@ class HochrechnungClient(BaseNtClient):
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
+        self._check_preconditions(dt_begin, dt.datetime(2011, 3, 31, 22), dt_end)
         return self._basic_read_nt(
-            "data/hochrechnung/Wind", dt_begin, dt_end, transform_dates
+            "hochrechnung/Wind", dt_begin, dt_end, transform_dates
         )
 
     def online_hochrechnung_windonshore(
@@ -124,17 +129,18 @@ class HochrechnungClient(BaseNtClient):
         transform_dates=False,
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /OnlineHochrechnung/Windonshore.
+        Return a pandas Dataframe with data of the endpoint /onlineHochrechnung/Windonshore.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2011-03-31T22:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2011-12-31T23:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
+        self._check_preconditions(dt_begin, dt.datetime(2011, 12, 31, 23), dt_end)
         return self._basic_read_nt(
-            "data/OnlineHochrechnung/Windonshore", dt_begin, dt_end, transform_dates
+            "onlineHochrechnung/Windonshore", dt_begin, dt_end, transform_dates
         )
 
     def online_hochrechnung_windoffshore(
@@ -144,17 +150,18 @@ class HochrechnungClient(BaseNtClient):
         transform_dates=False,
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /OnlineHochrechnung/Windoffshore.
+        Return a pandas Dataframe with data of the endpoint /onlineHochrechnung/Windoffshore.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2011-03-31T22:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2011-12-31T23:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
+        self._check_preconditions(dt_begin, dt.datetime(2011, 12, 31, 23), dt_end)
         return self._basic_read_nt(
-            "data/OnlineHochrechnung/Windoffshore", dt_begin, dt_end, transform_dates
+            "onlineHochrechnung/Windoffshore", dt_begin, dt_end, transform_dates
         )
 
     def online_hochrechnung_solar(
@@ -164,17 +171,18 @@ class HochrechnungClient(BaseNtClient):
         transform_dates=False,
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /OnlineHochrechnung/Solar.
+        Return a pandas Dataframe with data of the endpoint /onlineHochrechnung/Solar.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2011-03-31T22:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2011-12-31T23:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
+        self._check_preconditions(dt_begin, dt.datetime(2011, 12, 31, 23), dt_end)
         return self._basic_read_nt(
-            "data/OnlineHochrechnung/Solar", dt_begin, dt_end, transform_dates
+            "onlineHochrechnung/Solar", dt_begin, dt_end, transform_dates
         )
 
     def prognose_solar(
@@ -193,9 +201,7 @@ class HochrechnungClient(BaseNtClient):
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
-        return self._basic_read_nt(
-            "data/prognose/Solar", dt_begin, dt_end, transform_dates
-        )
+        return self._basic_read_nt("prognose/Solar", dt_begin, dt_end, transform_dates)
 
     def prognose_wind(
         self,
@@ -213,6 +219,4 @@ class HochrechnungClient(BaseNtClient):
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
-        return self._basic_read_nt(
-            "data/prognose/Wind", dt_begin, dt_end, transform_dates
-        )
+        return self._basic_read_nt("prognose/Wind", dt_begin, dt_end, transform_dates)

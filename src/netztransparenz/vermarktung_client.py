@@ -3,6 +3,7 @@ Client for all /vermarktung/ Endpoints and other Endpoints with market data like
 """
 
 from netztransparenz.base_client import BaseNtClient
+from netztransparenz.constants import endpoints
 import requests
 import datetime as dt
 import io
@@ -13,9 +14,6 @@ _csv_date_format = "%Y-%m-%d %H:%M %Z"
 
 
 class VermarktungClient(BaseNtClient):
-    def __init__(self, client_id, client_pass):
-        super().__init__(client_id, client_pass)
-
     def _basic_read_vermarktung(
         self,
         resource_url,
@@ -38,11 +36,27 @@ class VermarktungClient(BaseNtClient):
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
-        url = f"{self._API_BASE_URL}/{resource_url}"
+        if not self._check_preconditions(
+            dt_begin, endpoints[f"/{resource_url}"]["first_data"], dt_end
+        ):
+            return self._return_empty_frame(f"/{resource_url}", transform_dates)
+
+        url = f"{self._API_BASE_URL}/data/{resource_url}"
         if (dt_begin is not None) and (dt_end is not None):
+            if (dt_begin + self.max_query_distance) < dt_end:
+                # split into multiple api calls
+                timeframes = self._split_timeframe(dt_begin, dt_end)
+                dataframes = []
+                for timeframe in timeframes:
+                    dataframes.append(
+                        self._basic_read_vermarktung(
+                            resource_url, timeframe[0], timeframe[1], transform_dates
+                        )
+                    )
+                return pd.concat(dataframes)
             start_of_data = dt_begin.strftime(self._api_date_format)
             end_of_data = dt_end.strftime(self._api_date_format)
-            url = f"{self._API_BASE_URL}/{resource_url}/{start_of_data}/{end_of_data}"
+            url = f"{url}/{start_of_data}/{end_of_data}"
 
         response = requests.get(
             url, headers={"Authorization": "Bearer {}".format(self.token)}
@@ -97,7 +111,24 @@ class VermarktungClient(BaseNtClient):
                                if this option resolves to "True" the times will be transformed into a
                                fully qualified timestamp. (default: False)
         """
-        url = f"{self._API_BASE_URL}/{resource_url}/{dt_begin.strftime(self._api_date_format)}/{dt_end.strftime(self._api_date_format)}"
+        if not self._check_preconditions(
+            dt_begin, endpoints[f"/{resource_url}"]["first_data"], dt_end
+        ):
+            return self._return_empty_frame(f"/{resource_url}", transform_dates)
+
+        if (dt_begin + self.max_query_distance) < dt_end:
+            # split into multiple api calls
+            timeframes = self._split_timeframe(dt_begin, dt_end)
+            dataframes = []
+            for timeframe in timeframes:
+                dataframes.append(
+                    self._basic_read_negative_preise(
+                        resource_url, timeframe[0], timeframe[1], transform_dates
+                    )
+                )
+            return pd.concat(dataframes)
+
+        url = f"{self._API_BASE_URL}/data/{resource_url}/{dt_begin.strftime(self._api_date_format)}/{dt_end.strftime(self._api_date_format)}"
 
         response = requests.get(
             url, headers={"Authorization": "Bearer {}".format(self.token)}
@@ -108,7 +139,7 @@ class VermarktungClient(BaseNtClient):
             sep=";",
             header=0,
             decimal=",",
-            na_values=["N.A."],
+            na_values=["N.A.", "-"],
         )
 
         if transform_dates:
@@ -133,7 +164,7 @@ class VermarktungClient(BaseNtClient):
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         return self._basic_read_vermarktung(
-            "data/vermarktung/DifferenzEinspeiseprognose",
+            "vermarktung/DifferenzEinspeiseprognose",
             dt_begin,
             dt_end,
             transform_dates,
@@ -156,7 +187,7 @@ class VermarktungClient(BaseNtClient):
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         return self._basic_read_vermarktung(
-            "data/vermarktung/InanspruchnahmeAusgleichsenergie",
+            "vermarktung/InanspruchnahmeAusgleichsenergie",
             dt_begin,
             dt_end,
             transform_dates,
@@ -179,7 +210,7 @@ class VermarktungClient(BaseNtClient):
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         return self._basic_read_vermarktung(
-            "data/vermarktung/UntertaegigeStrommengen",
+            "vermarktung/UntertaegigeStrommengen",
             dt_begin,
             dt_end,
             transform_dates,
@@ -202,7 +233,7 @@ class VermarktungClient(BaseNtClient):
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         return self._basic_read_vermarktung(
-            "data/vermarktung/VermarktungEpex", dt_begin, dt_end, transform_dates
+            "vermarktung/VermarktungEpex", dt_begin, dt_end, transform_dates
         )
 
     def vermarktung_exaa(
@@ -222,7 +253,7 @@ class VermarktungClient(BaseNtClient):
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         return self._basic_read_vermarktung(
-            "data/vermarktung/VermarktungExaa", dt_begin, dt_end, transform_dates
+            "vermarktung/VermarktungExaa", dt_begin, dt_end, transform_dates
         )
 
     def vermarktung_solar(
@@ -242,7 +273,7 @@ class VermarktungClient(BaseNtClient):
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         return self._basic_read_vermarktung(
-            "data/vermarktung/VermarktungsSolar", dt_begin, dt_end, transform_dates
+            "vermarktung/VermarktungsSolar", dt_begin, dt_end, transform_dates
         )
 
     def vermarktung_wind(
@@ -262,7 +293,7 @@ class VermarktungClient(BaseNtClient):
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         return self._basic_read_vermarktung(
-            "data/vermarktung/VermarktungsWind", dt_begin, dt_end, transform_dates
+            "vermarktung/VermarktungsWind", dt_begin, dt_end, transform_dates
         )
 
     def vermarktung_sonstige(
@@ -282,7 +313,7 @@ class VermarktungClient(BaseNtClient):
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         return self._basic_read_vermarktung(
-            "data/vermarktung/VermarktungsSonstige", dt_begin, dt_end, transform_dates
+            "vermarktung/VermarktungsSonstige", dt_begin, dt_end, transform_dates
         )
 
     def spotmarktpreise(
@@ -295,18 +326,34 @@ class VermarktungClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint /Spotmarktpreise.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2013-12-31T23:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2020-12-31T23:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
         return self._basic_read_vermarktung(
-            "data/Spotmarktpreise",
+            "Spotmarktpreise",
             dt_begin,
             dt_end,
             transform_dates=transform_dates,
             dateformat="%d.%m.%Y %H:%M %Z",
+        )
+
+    def negative_preise(
+        self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
+    ):
+        """
+        Return a pandas Dataframe with data of the endpoint /NegativePreise.
+
+            dt_begin -- datetime object for start of data in UTC
+            dt_end -- datetime object for end of data in UTC
+            transform_dates -- The data contains times as a string in the format "%Y-%m-%d %H:%M"
+                               if this option resolves to "True" the times will be transformed into a
+                               fully qualified timestamp. (default: False)
+        """
+        return self._basic_read_negative_preise(
+            "NegativePreise", dt_begin, dt_end, transform_dates
         )
 
     def negative_preise_1h(
@@ -314,7 +361,6 @@ class VermarktungClient(BaseNtClient):
     ):
         """
         Return a pandas Dataframe with data of the endpoint /NegativePreise/1.
-        dt_begin and dt_end should not be too far apart since the api may throw an error for spans more than a year.
 
             dt_begin -- datetime object for start of data in UTC
             dt_end -- datetime object for end of data in UTC
@@ -323,15 +369,14 @@ class VermarktungClient(BaseNtClient):
                                fully qualified timestamp. (default: False)
         """
         return self._basic_read_negative_preise(
-            "data/NegativePreise/1", dt_begin, dt_end, transform_dates
+            "NegativePreise/1", dt_begin, dt_end, transform_dates
         )
 
     def negative_preise_3h(
         self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /NegativePreise/1.
-        dt_begin and dt_end should not be too far apart since the api may throw an error for spans more than a year.
+        Return a pandas Dataframe with data of the endpoint /NegativePreise/3.
 
             dt_begin -- datetime object for start of data in UTC
             dt_end -- datetime object for end of data in UTC
@@ -340,15 +385,14 @@ class VermarktungClient(BaseNtClient):
                                fully qualified timestamp. (default: False)
         """
         return self._basic_read_negative_preise(
-            "data/NegativePreise/3", dt_begin, dt_end, transform_dates
+            "NegativePreise/3", dt_begin, dt_end, transform_dates
         )
 
     def negative_preise_4h(
         self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /NegativePreise/1.
-        dt_begin and dt_end should not be too far apart since the api may throw an error for spans more than a year.
+        Return a pandas Dataframe with data of the endpoint /NegativePreise/4.
 
             dt_begin -- datetime object for start of data in UTC
             dt_end -- datetime object for end of data in UTC
@@ -357,15 +401,14 @@ class VermarktungClient(BaseNtClient):
                                fully qualified timestamp. (default: False)
         """
         return self._basic_read_negative_preise(
-            "data/NegativePreise/4", dt_begin, dt_end, transform_dates
+            "NegativePreise/4", dt_begin, dt_end, transform_dates
         )
 
     def negative_preise_6h(
         self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /NegativePreise/1.
-        dt_begin and dt_end should not be too far apart since the api may throw an error for spans more than a year.
+        Return a pandas Dataframe with data of the endpoint /NegativePreise/6.
 
             dt_begin -- datetime object for start of data in UTC
             dt_end -- datetime object for end of data in UTC
@@ -374,15 +417,33 @@ class VermarktungClient(BaseNtClient):
                                fully qualified timestamp. (default: False)
         """
         return self._basic_read_negative_preise(
-            "data/NegativePreise/6", dt_begin, dt_end, transform_dates
+            "NegativePreise/6", dt_begin, dt_end, transform_dates
         )
 
-    def jahresmarktpraemie(self, year: int | None = None):
+    def negative_preise_15m(
+        self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
+    ):
+        """
+        Return a pandas Dataframe with data of the endpoint /NegativePreise/15.
+
+            dt_begin -- datetime object for start of data in UTC
+            dt_end -- datetime object for end of data in UTC
+            transform_dates -- The data contains times as a string in the format "%Y-%m-%d %H:%M"
+                               if this option resolves to "True" the times will be transformed into a
+                               fully qualified timestamp. (default: False)
+        """
+        return self._basic_read_negative_preise(
+            "NegativePreise/15", dt_begin, dt_end, transform_dates
+        )
+
+    def jahresmarktpraemie(self, year: int | None = None, transpose: bool = False):
         """
         Return a pandas Dataframe with data of the endpoint /Jahresmarktpraemie.
         If no year is given, all available data will be queried.
 
             year -- int representation of the year to get the data for (earliest data: 2020)
+            transpose -- The raw data has each year as a column insted of a row.
+                         If this parameter is set to True the dataframe will be transposed
         """
         url = f"{self._API_BASE_URL}/data/Jahresmarktpraemie/"
         if year is not None:
@@ -399,6 +460,9 @@ class VermarktungClient(BaseNtClient):
             decimal=",",
             na_values=["N.A."],
         )
+        if transpose:
+            df = df.set_index(["Alle Werte in ct/kWh"])
+            df = df.transpose()
         return df
 
     def marktpraemie(self, dt_begin: dt.date, dt_end: dt.date, transform_dates=False):
@@ -410,6 +474,13 @@ class VermarktungClient(BaseNtClient):
             dt_end -- date object for end of data (day will be ignored)
             transform_dates -- data contains months in th format "1/2012"
         """
+        if not self._check_preconditions(
+            dt.datetime(dt_begin.year, dt_begin.month, dt_begin.day),
+            endpoints["/marktpraemie"]["first_data"],
+            dt.datetime(dt_end.year, dt_end.month, dt_end.day),
+        ):
+            return self._return_empty_frame("/marktpraemie", transform_dates)
+
         url = f"{self._API_BASE_URL}/data/marktpraemie/{dt_begin.month}/{dt_begin.year}/{dt_end.month}/{dt_end.year}"
         response = requests.get(
             url, headers={"Authorization": "Bearer {}".format(self.token)}
@@ -436,6 +507,21 @@ class VermarktungClient(BaseNtClient):
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
         """
+        if not self._check_preconditions(
+            dt_begin, endpoints["/IdAep"]["first_data"], dt_end
+        ):
+            return self._return_empty_frame("/IdAep", transform_dates)
+
+        if (dt_begin + self.max_query_distance) < dt_end:
+            # split into multiple api calls
+            timeframes = self._split_timeframe(dt_begin, dt_end)
+            dataframes = []
+            for timeframe in timeframes:
+                dataframes.append(
+                    self.id_aep(timeframe[0], timeframe[1], transform_dates)
+                )
+            return pd.concat(dataframes)
+
         url = f"{self._API_BASE_URL}/data/IdAep/{dt_begin.strftime(self._api_date_format)}/{dt_end.strftime(self._api_date_format)}"
 
         response = requests.get(

@@ -26,17 +26,17 @@ endpoints = {
         "header": "Datum;von;Zeitzone von;bis;Zeitzone bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)",
         "transformed_header": "von;bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)",
     },
-    "/onlinehochrechnung/Solar": {
+    "/onlineHochrechnung/Solar": {
         "first_data": dt.datetime(2011, 12, 31, 23),
         "header": "Datum;von;Zeitzone von;bis;Zeitzone bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)",
         "transformed_header": "von;bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)",
     },
-    "/onlinehochrechnung/Windonshore": {
+    "/onlineHochrechnung/Windonshore": {
         "first_data": dt.datetime(2011, 12, 31, 23),
         "header": "Datum;von;Zeitzone von;bis;Zeitzone bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)",
         "transformed_header": "von;bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)",
     },
-    "/onlinehochrechnung/Windoffshore": {
+    "/onlineHochrechnung/Windoffshore": {
         "first_data": dt.datetime(2011, 12, 31, 23),
         "header": "Datum;von;Zeitzone von;bis;Zeitzone bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)",
         "transformed_header": "von;bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)",
@@ -113,7 +113,7 @@ endpoints = {
     },
     "/IdAep": {
         "first_data": dt.datetime(2020, 6, 30, 22),
-        "header": "Datum von;(Uhrzeit) von;Zeitzone;(Uhrzeit) bis;Zeitzone;ID AEP in €/MWh",
+        "header": "Datum von;(Uhrzeit) von;Zeitzone von;(Uhrzeit) bis;Zeitzone bis;ID AEP in €/MWh",
         "transformed_header": "von;bis;ID AEP in €/MWh",
     },
     "/marktpraemie": {
