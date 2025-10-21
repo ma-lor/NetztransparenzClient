@@ -43,7 +43,9 @@ class VermarktungClient(BaseNtClient):
 
         url = f"{self._API_BASE_URL}/data/{resource_url}"
         if (dt_begin is not None) and (dt_end is not None):
-            if (dt_begin + self.max_query_distance) < dt_end:
+            if (
+                dt_begin.astimezone(dt.UTC) + self.max_query_distance
+            ) < dt_end.astimezone(dt.UTC):
                 # split into multiple api calls
                 timeframes = self._split_timeframe(dt_begin, dt_end)
                 dataframes = []
@@ -116,7 +118,9 @@ class VermarktungClient(BaseNtClient):
         ):
             return self._return_empty_frame(f"/{resource_url}", transform_dates)
 
-        if (dt_begin + self.max_query_distance) < dt_end:
+        if (dt_begin.astimezone(dt.UTC) + self.max_query_distance) < dt_end.astimezone(
+            dt.UTC
+        ):
             # split into multiple api calls
             timeframes = self._split_timeframe(dt_begin, dt_end)
             dataframes = []
@@ -512,7 +516,9 @@ class VermarktungClient(BaseNtClient):
         ):
             return self._return_empty_frame("/IdAep", transform_dates)
 
-        if (dt_begin + self.max_query_distance) < dt_end:
+        if (dt_begin.astimezone(dt.UTC) + self.max_query_distance) < dt_end.astimezone(
+            dt.UTC
+        ):
             # split into multiple api calls
             timeframes = self._split_timeframe(dt_begin, dt_end)
             dataframes = []

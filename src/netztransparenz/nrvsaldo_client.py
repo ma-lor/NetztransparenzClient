@@ -42,7 +42,9 @@ class NrvSaldoClient(BaseNtClient):
 
         url = f"{self._API_BASE_URL}/data/{resource_url}"
         if (dt_begin is not None) and (dt_end is not None):
-            if (dt_begin + self.max_query_distance) < dt_end:
+            if (
+                dt_begin.astimezone(dt.UTC) + self.max_query_distance
+            ) < dt_end.astimezone(dt.UTC):
                 # split into multiple api calls
                 timeframes = self._split_timeframe(dt_begin, dt_end)
                 dataframes = []
@@ -97,7 +99,9 @@ class NrvSaldoClient(BaseNtClient):
         ):
             return self._return_empty_frame("/TrafficLight", False)
 
-        if (dt_begin + self.max_query_distance) < dt_end:
+        if (dt_begin.astimezone(dt.UTC) + self.max_query_distance) < dt_end.astimezone(
+            dt.UTC
+        ):
             # split into multiple api calls
             timeframes = self._split_timeframe(dt_begin, dt_end)
             dataframes = []
@@ -390,7 +394,9 @@ class NrvSaldoClient(BaseNtClient):
 
         url = f"{self._API_BASE_URL}/data/NrvSaldo/SrlMolAbweichungen/Betrieblich"
         if (dt_begin is not None) and (dt_end is not None):
-            if (dt_begin + self.max_query_distance) < dt_end:
+            if (
+                dt_begin.astimezone(dt.UTC) + self.max_query_distance
+            ) < dt_end.astimezone(dt.UTC):
                 # split into multiple api calls
                 timeframes = self._split_timeframe(dt_begin, dt_end)
                 dataframes = []
