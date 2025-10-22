@@ -3,7 +3,7 @@ import pytest
 
 import netztransparenz as nt
 
-START = dt.datetime(2024, 1, 1, 0, 0)
+START = dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC)
 END = dt.datetime(2024, 2, 1, 0, 0)
 _API_BASE_URL = "https://ds.netztransparenz.de/api/v1"
 
@@ -39,7 +39,7 @@ def test_basic_read_nrvsaldo(client, requests_mock):
         f"{_API_BASE_URL}/data/NrvSaldo/NRVSaldo/Betrieblich/2025-01-02T00:00:00/2025-01-03T00:00:00",
         text=body2,
     )
-    result = client._basic_read_nrvsaldo("NrvSaldo/NRVSaldo/Betrieblich", dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 3), True)
+    result = client._basic_read_nrvsaldo("NrvSaldo/NRVSaldo/Betrieblich", dt.datetime(2025, 1, 1, tzinfo=dt.UTC), dt.datetime(2025, 1, 3), True)
     assert result["Data"].iloc[0] == "Test"
     assert result["Data"].iloc[1] == "Test2"
 

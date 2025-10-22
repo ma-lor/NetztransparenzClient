@@ -41,9 +41,9 @@ class DienstleistungenClient(BaseNtClient):
 
         url = f"{self._API_BASE_URL}/data/{resource_url}"
         if (dt_begin is not None) and (dt_end is not None):
-            if (
-                dt_begin.astimezone(dt.UTC) + self.max_query_distance
-            ) < dt_end.astimezone(dt.UTC):
+            dt_begin = dt_begin.replace(tzinfo=dt.UTC)
+            dt_end = dt_end.replace(tzinfo=dt.UTC)
+            if (dt_begin + self.max_query_distance) < dt_end:
                 # split into multiple api calls
                 timeframes = self._split_timeframe(dt_begin, dt_end)
                 dataframes = []
@@ -126,9 +126,9 @@ class DienstleistungenClient(BaseNtClient):
 
         url = f"{self._API_BASE_URL}/data/{resource_url}"
         if (dt_begin is not None) and (dt_end is not None):
-            if (
-                dt_begin.astimezone(dt.UTC) + self.max_query_distance
-            ) < dt_end.astimezone(dt.UTC):
+            dt_begin = dt_begin.replace(tzinfo=dt.UTC)
+            dt_end = dt_end.replace(tzinfo=dt.UTC)
+            if (dt_begin + self.max_query_distance) < dt_end:
                 # split into multiple api calls
                 timeframes = self._split_timeframe(dt_begin, dt_end)
                 dataframes = []

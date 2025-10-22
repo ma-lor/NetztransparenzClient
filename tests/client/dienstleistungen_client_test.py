@@ -38,7 +38,7 @@ def test_basic_read_systemleistungen(client, requests_mock):
         f"{_API_BASE_URL}/data/redispatch/2024-01-01T00:00:00/2024-12-31T00:00:00",
         text=body2,
     )
-    result = client._basic_read_systemdienstleistungen("redispatch", dt.datetime(2023, 1, 1), dt.datetime(2024, 12, 31), True)
+    result = client._basic_read_systemdienstleistungen("redispatch", dt.datetime(2023, 1, 1, tzinfo=dt.UTC), dt.datetime(2024, 12, 31), True)
     assert result["DATA"].iloc[0] == "Test"
     assert result["DATA"].iloc[1] == "Test2"
 
@@ -58,7 +58,7 @@ def test_basic_read_abregelung(client, requests_mock):
         f"{_API_BASE_URL}/data/AusgewieseneABSM/2025-01-02T00:00:00/2025-01-03T00:00:00",
         text=body2,
     )
-    result = client._basic_read_abregelung("AusgewieseneABSM", dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 3), True)
+    result = client._basic_read_abregelung("AusgewieseneABSM", dt.datetime(2025, 1, 1, tzinfo=dt.UTC), dt.datetime(2025, 1, 3), True)
     assert result["Data"].iloc[0] == "Test"
     assert result["Data"].iloc[1] == "Test2"
 

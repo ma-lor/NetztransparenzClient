@@ -4,7 +4,7 @@ import pytest
 
 import netztransparenz as nt
 
-START = dt.datetime(2024, 1, 1, 0, 0)
+START = dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC)
 END = dt.datetime(2024, 2, 1, 0, 0)
 _API_BASE_URL = "https://ds.netztransparenz.de/api/v1"
 
