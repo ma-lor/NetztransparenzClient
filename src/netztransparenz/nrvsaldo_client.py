@@ -75,11 +75,13 @@ class NrvSaldoClient(BaseNtClient):
             df["von"] = pd.to_datetime(
                 df["Datum"] + " " + df["von"] + " " + df["Zeitzone"],
                 format=_nrvsaldo_date_format,
-            ).dt.tz_convert(None)
+                utc=True,
+            )
             df["bis"] = pd.to_datetime(
                 df["Datum"] + " " + df["bis"] + " " + df["Zeitzone"],
                 format=_nrvsaldo_date_format,
-            ).dt.tz_convert(None)
+                utc=True,
+            )
             # The end of timeframes may be 00:00 of the next day witch is not correctly represented in timestamps
             df["bis"] = df["bis"].where(
                 df["bis"].dt.time != dt.time(0, 0), df["bis"] + dt.timedelta(days=1)
@@ -427,11 +429,13 @@ class NrvSaldoClient(BaseNtClient):
             df["von"] = pd.to_datetime(
                 df["Datum von"] + " " + df["Uhrzeit von"] + " " + df["Zeitzone von"],
                 format=_nrvsaldo_date_format,
-            ).dt.tz_convert(None)
+                utc=True
+            )
             df["bis"] = pd.to_datetime(
                 df["Datum bis"] + " " + df["Uhrzeit bis"] + " " + df["Zeitzone bis"],
                 format=_nrvsaldo_date_format,
-            ).dt.tz_convert(None)
+                utc=True
+            )
             # The end of timeframes may be 00:00 of the next day witch is not correctly represented in timestamps
             df["bis"] = df["bis"].where(
                 df["bis"].dt.time != dt.time(0, 0), df["bis"] + dt.timedelta(days=1)
