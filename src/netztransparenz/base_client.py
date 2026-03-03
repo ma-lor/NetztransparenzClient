@@ -31,8 +31,8 @@ class BaseNtClient:
             strict -- if True, raises Errors on not matching date parameters.
                       if False, returns empty dataframes in such cases.
                       Default=True
-            max_query_distance -- The Api may return a HTTP 500 error if an explicit timeframe is too large.
-                                  The client will split queries for linger timeframes than given timedelta
+            max_query_distance -- The API may return a HTTP 500 error if an explicit timeframe is too large.
+                                  The client will split queries for longer timeframes than given timedelta
                                   into several smaller requests.
         """
         self._API_BASE_URL = "https://ds.netztransparenz.de/api/v1"
@@ -81,7 +81,7 @@ class BaseNtClient:
 
     def set_max_query_distance(self, max_query_distance: dt.timedelta):
         """
-        Set the maximum time that is queried with a single api call.
+        Set the maximum time that is queried with a single API call.
 
             strict -- True for raising errors, False for returning empty dataframes.
         """

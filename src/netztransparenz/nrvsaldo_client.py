@@ -22,7 +22,7 @@ class NrvSaldoClient(BaseNtClient):
         transform_dates=False,
     ):
         """
-        Internal method to read data in the format of most /nrvsaldo dataseries.
+        Internal method to read data in the format of most /nrvsaldo data series.
         Target format is: Dates separated in "Datum", "von", "bis", "Zeitzone".
         Return a pandas Dataframe with data of the endpoint specified with resource_url.
         If either dt_begin or dt_end is None, all available data will be queried.
@@ -45,7 +45,7 @@ class NrvSaldoClient(BaseNtClient):
             dt_begin = dt_begin.replace(tzinfo=dt.UTC)
             dt_end = dt_end.replace(tzinfo=dt.UTC)
             if (dt_begin + self.max_query_distance) < dt_end:
-                # split into multiple api calls
+                # split into multiple API calls
                 timeframes = self._split_timeframe(dt_begin, dt_end)
                 dataframes = []
                 for timeframe in timeframes:
@@ -104,7 +104,7 @@ class NrvSaldoClient(BaseNtClient):
         dt_begin = dt_begin.replace(tzinfo=dt.UTC)
         dt_end = dt_end.replace(tzinfo=dt.UTC)
         if (dt_begin + self.max_query_distance) < dt_end:
-            # split into multiple api calls
+            # split into multiple API calls
             timeframes = self._split_timeframe(dt_begin, dt_end)
             dataframes = []
             for timeframe in timeframes:
@@ -399,7 +399,7 @@ class NrvSaldoClient(BaseNtClient):
             dt_begin = dt_begin.replace(tzinfo=dt.UTC)
             dt_end = dt_end.replace(tzinfo=dt.UTC)
             if (dt_begin + self.max_query_distance) < dt_end:
-                # split into multiple api calls
+                # split into multiple API calls
                 timeframes = self._split_timeframe(dt_begin, dt_end)
                 dataframes = []
                 for timeframe in timeframes:

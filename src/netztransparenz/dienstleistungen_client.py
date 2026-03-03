@@ -21,7 +21,7 @@ class DienstleistungenClient(BaseNtClient):
         transform_dates=False,
     ):
         """
-        Internal method to read data in the format of most 'systemdienstleistungen' dataseries.
+        Internal method to read data in the format of most 'systemdienstleistungen' data series.
         Target format is: Dates separated in "BEGINN_DATUM", "BEGINN_UHRZEIT", "ENDE_DATUM",
         "ENDE_UHRZEIT", "ZEITZONE_VON", "ZEITZONE_BIS".
         Return a pandas Dataframe with data of the endpoint specified with resource_url.
@@ -44,7 +44,7 @@ class DienstleistungenClient(BaseNtClient):
             dt_begin = dt_begin.replace(tzinfo=dt.UTC)
             dt_end = dt_end.replace(tzinfo=dt.UTC)
             if (dt_begin + self.max_query_distance) < dt_end:
-                # split into multiple api calls
+                # split into multiple API calls
                 timeframes = self._split_timeframe(dt_begin, dt_end)
                 dataframes = []
                 for timeframe in timeframes:
@@ -112,7 +112,7 @@ class DienstleistungenClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint specified with resource_url.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            resource_url -- url of the endpoint without the base url and without leading or trailing "/"
+            resource_url -- URL of the endpoint without the base URL and without leading or trailing "/"
             dt_begin -- datetime object for start of data in UTC
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
@@ -129,7 +129,7 @@ class DienstleistungenClient(BaseNtClient):
             dt_begin = dt_begin.replace(tzinfo=dt.UTC)
             dt_end = dt_end.replace(tzinfo=dt.UTC)
             if (dt_begin + self.max_query_distance) < dt_end:
-                # split into multiple api calls
+                # split into multiple API calls
                 timeframes = self._split_timeframe(dt_begin, dt_end)
                 dataframes = []
                 for timeframe in timeframes:

@@ -1,5 +1,5 @@
 # Netztransparenz Client
-This is a small python client to access the data of the german [Netztransparenz portal](https://www.netztransparenz.de/).
+This is a small python client to access the data of the German [Netztransparenz portal](https://www.netztransparenz.de/).
 It handles authentication, loads the CSV data and transforms it into a [pandas](https://github.com/pandas-dev/pandas) dataframe with some optional format changes.
 
 This is an unofficial client, the makers of this library are not affiliated with NETZTRANSPARENZ.DE.
@@ -51,7 +51,7 @@ You can specify the timeframe you want data for:
 ```
 
 ### Transform dates
-For some of the datasets, dates are split up into five columns which makes them hard to sort. If you set the transform_dates flag to true they are converted to two timestamps. 
+For some of the data sets, dates are split up into five columns which makes them hard to sort. If you set the transform_dates flag to true, they are converted to two timestamps. 
 Also, "von" is turned into the index.
 
 ```

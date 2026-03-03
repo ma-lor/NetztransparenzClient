@@ -46,7 +46,7 @@ class VermarktungClient(BaseNtClient):
             dt_begin = dt_begin.replace(tzinfo=dt.UTC)
             dt_end = dt_end.replace(tzinfo=dt.UTC)
             if (dt_begin + self.max_query_distance) < dt_end:
-                # split into multiple api calls
+                # split into multiple API calls
                 timeframes = self._split_timeframe(dt_begin, dt_end)
                 dataframes = []
                 for timeframe in timeframes:
@@ -121,7 +121,7 @@ class VermarktungClient(BaseNtClient):
         if (dt_begin.astimezone(dt.UTC) + self.max_query_distance) < dt_end.astimezone(
             dt.UTC
         ):
-            # split into multiple api calls
+            # split into multiple API calls
             timeframes = self._split_timeframe(dt_begin, dt_end)
             dataframes = []
             for timeframe in timeframes:
@@ -446,7 +446,7 @@ class VermarktungClient(BaseNtClient):
         If no year is given, all available data will be queried.
 
             year -- int representation of the year to get the data for (earliest data: 2020)
-            transpose -- The raw data has each year as a column insted of a row.
+            transpose -- The raw data has each year as a column instead of a row.
                          If this parameter is set to True the dataframe will be transposed
         """
         url = f"{self._API_BASE_URL}/data/Jahresmarktpraemie/"
@@ -476,7 +476,7 @@ class VermarktungClient(BaseNtClient):
 
             dt_begin -- date object for start of data (day will be ignored)
             dt_end -- date object for end of data (day will be ignored)
-            transform_dates -- data contains months in th format "1/2012"
+            transform_dates -- data contains months in the format "1/2012"
         """
         if not self._check_preconditions(
             dt.datetime(dt_begin.year, dt_begin.month, dt_begin.day),
@@ -519,7 +519,7 @@ class VermarktungClient(BaseNtClient):
         if (dt_begin.astimezone(dt.UTC) + self.max_query_distance) < dt_end.astimezone(
             dt.UTC
         ):
-            # split into multiple api calls
+            # split into multiple API calls
             timeframes = self._split_timeframe(dt_begin, dt_end)
             dataframes = []
             for timeframe in timeframes:

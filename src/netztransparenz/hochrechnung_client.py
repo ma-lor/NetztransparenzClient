@@ -22,7 +22,7 @@ class HochrechnungClient(BaseNtClient):
         transform_dates=False,
     ):
         """
-        Internal method to read data in one of the common formats of th nt portal.
+        Internal method to read data in one of the common formats of the nt portal.
         Target format is: Dates separated in "Datum", "von", "Zeitzone von", "bis", "Zeitzone bis".
         Return a pandas Dataframe with data of the endpoint specified with resource_url.
         If either dt_begin or dt_end is None, all available data will be queried.
@@ -70,7 +70,7 @@ class HochrechnungClient(BaseNtClient):
                 format=_csv_date_format,
                 utc=True,
             )
-            # The end of timeframes may be 00:00 of the next day which is not correctly represented in timestamps
+            # The end of time frames may be 00:00 of the next day which is not correctly represented in timestamps
             df["bis"] = df["bis"].where(
                 df["bis"].dt.time != dt.time(0, 0), df["bis"] + dt.timedelta(days=1)
             )
