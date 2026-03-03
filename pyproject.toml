@@ -1,10 +1,10 @@
 [project]
 name = "netztransparenz"
-version = "0.2.3"
+version = "0.2.4"
 authors = [
   { name="Marvin Lorber", email="lorber@fh-aachen.de" },
 ]
-description = "A simple client to acess data from the German Netztransparenz portal"
+description = "A simple client to access data from the German Netztransparenz portal"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
