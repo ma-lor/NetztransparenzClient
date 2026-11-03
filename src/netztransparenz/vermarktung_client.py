@@ -52,7 +52,11 @@ class VermarktungClient(BaseNtClient):
                 for timeframe in timeframes:
                     dataframes.append(
                         self._basic_read_vermarktung(
-                            resource_url, timeframe[0], timeframe[1], transform_dates
+                            resource_url,
+                            timeframe[0],
+                            timeframe[1],
+                            transform_dates,
+                            dateformat,
                         )
                     )
                 return pd.concat(dataframes)
@@ -250,7 +254,7 @@ class VermarktungClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint /vermarktung/VermarktungExaa.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2011-12-31T22:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2011-12-31T23:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
@@ -376,6 +380,22 @@ class VermarktungClient(BaseNtClient):
             "NegativePreise/1", dt_begin, dt_end, transform_dates
         )
 
+    def negative_preise_2h(
+        self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
+    ):
+        """
+        Return a pandas Dataframe with data of the endpoint /NegativePreise/2.
+
+            dt_begin -- datetime object for start of data in UTC (no values before: 2025-12-31T23:00:00)
+            dt_end -- datetime object for end of data in UTC
+            transform_dates -- The data contains times as a string in the format "%Y-%m-%d %H:%M"
+                               if this option resolves to "True" the times will be transformed into a
+                               fully qualified timestamp. (default: False)
+        """
+        return self._basic_read_negative_preise(
+            "NegativePreise/2", dt_begin, dt_end, transform_dates
+        )
+
     def negative_preise_3h(
         self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
     ):
@@ -438,6 +458,124 @@ class VermarktungClient(BaseNtClient):
         """
         return self._basic_read_negative_preise(
             "NegativePreise/15", dt_begin, dt_end, transform_dates
+        )
+
+    def _basic_read_anspruch_verguetung(
+        self,
+        resource_url,
+        dt_begin: dt.datetime,
+        dt_end: dt.datetime,
+        transform_dates=False,
+    ):
+        """
+        Internal method to read data in the format of the /anspruchverguetung<law> dataseries.
+        Target format is: Dates separated in "Datum", "Zeitzone", "von", "bis" and one column
+        "AnspruchVerguetung" with "Ja" or "Nein", start and end dates not optional.
+        Return a pandas Dataframe with data of the endpoint specified with resource_url.
+
+            resource_url -- url of the endpoint without the base url and without leading or trailing "/"
+            dt_begin -- datetime object for start of data in UTC
+            dt_end -- datetime object for end of data in UTC
+            transform_dates -- The data contains times with date, time and timezone in separate columns
+                               if this option resolves to "True" the times will be transformed into two
+                               columns "von" and "bis" that contain fully qualified timestamps. (default: False)
+        """
+        if f"/{resource_url}" not in endpoints:
+            raise ValueError(f"Unknown endpoint {resource_url}")
+        if not self._check_preconditions(
+            dt_begin, endpoints[f"/{resource_url}"]["first_data"], dt_end
+        ):
+            return self._return_empty_frame(f"/{resource_url}", transform_dates)
+
+        dt_begin = dt_begin.replace(tzinfo=dt.UTC)
+        dt_end = dt_end.replace(tzinfo=dt.UTC)
+        if (dt_begin + self.max_query_distance) < dt_end:
+            # split into multiple API calls
+            timeframes = self._split_timeframe(dt_begin, dt_end)
+            dataframes = []
+            for timeframe in timeframes:
+                dataframes.append(
+                    self._basic_read_anspruch_verguetung(
+                        resource_url, timeframe[0], timeframe[1], transform_dates
+                    )
+                )
+            return pd.concat(dataframes)
+
+        url = f"{self._API_BASE_URL}/data/{resource_url}/{dt_begin.strftime(self._api_date_format)}/{dt_end.strftime(self._api_date_format)}"
+
+        response = requests.get(
+            url, headers={"Authorization": "Bearer {}".format(self.token)}
+        )
+        response.raise_for_status()
+        df = pd.read_csv(io.StringIO(response.text), sep=";", header=0)
+
+        if transform_dates:
+            df["von"] = pd.to_datetime(
+                df["Datum"] + " " + df["von"] + " " + df["Zeitzone"],
+                format="%d.%m.%Y %H:%M %Z",
+                utc=True,
+            )
+            df["bis"] = pd.to_datetime(
+                df["Datum"] + " " + df["bis"] + " " + df["Zeitzone"],
+                format="%d.%m.%Y %H:%M %Z",
+                utc=True,
+            )
+            # The end of timeframes may be 00:00 of the next day which is not correctly represented in timestamps
+            df["bis"] = df["bis"].where(
+                df["bis"].dt.time != dt.time(0, 0), df["bis"] + dt.timedelta(days=1)
+            )
+            df = df.drop(["Datum", "Zeitzone"], axis=1).set_index("von")
+
+        return df
+
+    def anspruch_verguetung_eeg(
+        self,
+        dt_begin: dt.datetime,
+        dt_end: dt.datetime,
+        transform_dates=False,
+        logic="1hour",
+    ):
+        """
+        Return a pandas Dataframe with data of the endpoint /anspruchverguetungeeg/<logic>.
+        It states for each period if plants have an entitlement to remuneration
+        according to the EEG despite negative prices.
+
+            dt_begin -- datetime object for start of data in UTC
+            dt_end -- datetime object for end of data in UTC
+            transform_dates -- The data contains times with date, time and timezone in separate columns
+                               if this option resolves to "True" the times will be transformed into two
+                               columns "von" and "bis" that contain fully qualified timestamps. (default: False)
+            logic -- the rule of the plant, one of (with the first data in UTC)
+                     "1hour" (2020-08-31T22:00), "2hour" (2025-12-31T23:00), "3hour" (2023-12-31T23:00),
+                     "4hour" (2020-12-31T23:00), "6hour" (2015-12-31T23:00), "15minutes" (2025-09-30T22:00)
+                     or "2cent" (2025-09-30T22:00). (default: "1hour")
+        """
+        return self._basic_read_anspruch_verguetung(
+            f"anspruchverguetungeeg/{logic}", dt_begin, dt_end, transform_dates
+        )
+
+    def anspruch_verguetung_kwkg(
+        self,
+        dt_begin: dt.datetime,
+        dt_end: dt.datetime,
+        transform_dates=False,
+        logic="1hour",
+    ):
+        """
+        Return a pandas Dataframe with data of the endpoint /anspruchverguetungkwkg/<logic>.
+        It states for each period if plants have an entitlement to remuneration
+        according to the KWKG despite negative prices.
+
+            dt_begin -- datetime object for start of data in UTC
+            dt_end -- datetime object for end of data in UTC
+            transform_dates -- The data contains times with date, time and timezone in separate columns
+                               if this option resolves to "True" the times will be transformed into two
+                               columns "von" and "bis" that contain fully qualified timestamps. (default: False)
+            logic -- the rule of the plant, one of (with the first data in UTC)
+                     "1hour" (2015-12-31T23:00) or "15minutes" (2025-09-30T22:00). (default: "1hour")
+        """
+        return self._basic_read_anspruch_verguetung(
+            f"anspruchverguetungkwkg/{logic}", dt_begin, dt_end, transform_dates
         )
 
     def jahresmarktpraemie(self, year: int | None = None, transpose: bool = False):

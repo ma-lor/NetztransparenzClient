@@ -92,18 +92,18 @@ def test_kapazitaetsreserve(client, requests_mock):
 
 
 def test_vorhaltung_krd(client, requests_mock):
-    # uses data from redispatch, since there is no data as of writing
+    # uses data from redispatch with the reason of the first measure on the endpoint
     body = """BEGINN_DATUM;BEGINN_UHRZEIT;ZEITZONE_VON;ENDE_DATUM;ENDE_UHRZEIT;ZEITZONE_BIS;GRUND_DER_MASSNAHME;RICHTUNG;MITTLERE_LEISTUNG_MW;MAXIMALE_LEISTUNG_MW;GESAMTE_ARBEIT_MWH;ANWEISENDER_UENB;ANFORDERNDER_UENB;BETROFFENE_ANLAGE;PRIMAERENERGIEART
-31.12.2024;23:00;UTC;01.01.2025;05:00;UTC;Strombedingter Redispatch;Wirkleistungseinspeisung reduzieren;41;56;166;50Hertz;50Hertz & Amprion & TenneT DE & TransnetBW;50H UW Putlitz;Erneuerbar
+10.11.2025;15:00;UTC;10.11.2025;23:00;UTC;Leistungsvorhaltung für kurativen Redispatch;Wirkleistungseinspeisung erhöhen;41;56;166;50Hertz;50Hertz & Amprion & TenneT DE & TransnetBW;50H UW Putlitz;Erneuerbar
 """
 
     requests_mock.get(
-        f"{_API_BASE_URL}/data/VorhaltungkRD/2025-01-01T00:00:00/2025-02-01T00:00:00",
+        f"{_API_BASE_URL}/data/VorhaltungkRD/2025-11-01T00:00:00/2025-12-01T00:00:00",
         text=body,
     )
-    result = client.vorhaltung_krd(dt.datetime(2025, 1, 1), dt.datetime(2025, 2, 1), True)
+    result = client.vorhaltung_krd(dt.datetime(2025, 11, 1), dt.datetime(2025, 12, 1), True)
     assert result["MITTLERE_LEISTUNG_MW"].iloc[0] == 41
-    assert result["BEGINN"].iloc[0] == pd.Timestamp(2024, 12, 31, 23, 0)
+    assert result["BEGINN"].iloc[0] == pd.Timestamp(2025, 11, 10, 15, 0)
 
 
 def test_ausgewiesene_absm(client, requests_mock):

@@ -68,7 +68,8 @@ class NrvSaldoClient(BaseNtClient):
             sep=";",
             header=0,
             decimal=",",
-            na_values=["N.A.", "N.E.", ""],
+            # nrvSaldoMinute marks missing values with "-"
+            na_values=["N.A.", "N.E.", "", "-"],
         )
 
         if transform_dates:
@@ -93,7 +94,7 @@ class NrvSaldoClient(BaseNtClient):
         """
         Return a pandas Dataframe with data of the endpoint /TrafficLight.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2021-09-21T22:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2021-09-22T22:00:00)
             dt_end -- datetime object for end of data in UTC
         """
         if not self._check_preconditions(
@@ -668,4 +669,40 @@ class NrvSaldoClient(BaseNtClient):
         """
         return self._basic_read_nrvsaldo(
             "NrvSaldo/VoAA/Qualitaetsgesichert", dt_begin, dt_end, transform_dates
+        )
+
+    def nrvsaldo_mfrr_satisfied_demand_betrieblich(
+        self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
+    ):
+        """
+        Return a pandas Dataframe with data of the endpoint /NrvSaldo/mFRRSatisfiedDemand/Betrieblich/.
+
+            dt_begin -- datetime object for start of data in UTC (no values before: 2026-01-13T23:00:00)
+            dt_end -- datetime object for end of data in UTC
+            transform_dates -- The data contains times with date, time and timezone in separate columns
+                               if this option resolves to "True" the times will be transformed into two
+                               columns "von" and "bis" that contain fully qualified timestamps. (default: False)
+        """
+        return self._basic_read_nrvsaldo(
+            "NrvSaldo/mFRRSatisfiedDemand/Betrieblich",
+            dt_begin,
+            dt_end,
+            transform_dates,
+        )
+
+    def nrvsaldo_nrvsaldo_minute_betrieblich(
+        self, dt_begin: dt.datetime, dt_end: dt.datetime, transform_dates=False
+    ):
+        """
+        Return a pandas Dataframe with data of the endpoint /NrvSaldo/nrvSaldoMinute/Betrieblich/.
+        The values are per minute.
+
+            dt_begin -- datetime object for start of data in UTC (no values before: 2026-01-27T23:00:00)
+            dt_end -- datetime object for end of data in UTC
+            transform_dates -- The data contains times with date, time and timezone in separate columns
+                               if this option resolves to "True" the times will be transformed into two
+                               columns "von" and "bis" that contain fully qualified timestamps. (default: False)
+        """
+        return self._basic_read_nrvsaldo(
+            "NrvSaldo/nrvSaldoMinute/Betrieblich", dt_begin, dt_end, transform_dates
         )

@@ -53,7 +53,7 @@ def test_online_hochrechnung_windonshore(client, requests_mock):
 2020-01-01;00:00;UTC;01:00;UTC;3573,990;1108,750;1165,210;130,408"""
 
     requests_mock.get(
-        f"{_API_BASE_URL}/data/OnlineHochrechnung/Windonshore/2020-01-01T00:00:00/2020-02-01T00:00:00",
+        f"{_API_BASE_URL}/data/onlinehochrechnung/Windonshore/qualitaetsgesichert/2020-01-01T00:00:00/2020-02-01T00:00:00",
         text=body,
     )
     result = client.online_hochrechnung_windonshore(START, END, True)
@@ -65,7 +65,7 @@ def test_online_hochrechnung_windoffshore(client, requests_mock):
 2020-01-01;00:00;UTC;01:00;UTC;641,670;N.E.;526,230;N.E."""
 
     requests_mock.get(
-        f"{_API_BASE_URL}/data/OnlineHochrechnung/Windoffshore/2020-01-01T00:00:00/2020-02-01T00:00:00",
+        f"{_API_BASE_URL}/data/onlinehochrechnung/Windoffshore/qualitaetsgesichert/2020-01-01T00:00:00/2020-02-01T00:00:00",
         text=body,
     )
     result = client.online_hochrechnung_windoffshore(START, END, True)
@@ -78,11 +78,26 @@ def test_online_hochrechnung_solar(client, requests_mock):
 2020-01-01;08:00;UTC;09:00;UTC;727,210;514,160;1308,210;567,246"""
 
     requests_mock.get(
-        f"{_API_BASE_URL}/data/OnlineHochrechnung/Solar/2020-01-01T00:00:00/2020-02-01T00:00:00",
+        f"{_API_BASE_URL}/data/onlinehochrechnung/Solar/qualitaetsgesichert/2020-01-01T00:00:00/2020-02-01T00:00:00",
         text=body,
     )
     result = client.online_hochrechnung_solar(START, END, True)
     assert result["50Hertz (MW)"].iloc[0] == 727.21
+
+
+def test_online_hochrechnung_betrieblich(client, requests_mock):
+    body = """Datum;von;Zeitzone von;bis;Zeitzone bis;50Hertz (MW);Amprion (MW);TenneT TSO (MW);TransnetBW (MW)
+2026-10-01;00:00;UTC;00:15;UTC;6759,930;1653,000;5692,378;92,500"""
+
+    requests_mock.get(
+        f"{_API_BASE_URL}/data/onlinehochrechnung/Windonshore/betrieblich/2026-10-01T00:00:00/2026-10-02T00:00:00",
+        text=body,
+    )
+    result = client.online_hochrechnung_windonshore(
+        dt.datetime(2026, 10, 1), dt.datetime(2026, 10, 2), True, "betrieblich"
+    )
+    assert result["50Hertz (MW)"].iloc[0] == 6759.93
+    assert result["bis"].iloc[0] == pd.Timestamp(2026, 10, 1, 0, 15, tz="UTC")
 
 
 def test_prognose_solar(client, requests_mock):

@@ -124,65 +124,80 @@ class HochrechnungClient(BaseNtClient):
 
     def online_hochrechnung_windonshore(
         self,
-        dt_begin: dt.datetime | None = None,
-        dt_end: dt.datetime | None = None,
+        dt_begin: dt.datetime,
+        dt_end: dt.datetime,
         transform_dates=False,
+        product="qualitaetsgesichert",
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /onlineHochrechnung/Windonshore.
-        If either dt_begin or dt_end is None, all available data will be queried.
+        Return a pandas Dataframe with data of the endpoint /onlinehochrechnung/Windonshore/<product>.
+        The endpoint has no query for all data, so dt_begin and dt_end are required.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2011-12-31T23:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2011-12-31T23:00:00 for
+                        "qualitaetsgesichert", 2026-08-31T22:00:00 for "betrieblich")
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
+            product -- "qualitaetsgesichert" (quality assured, hourly values) or
+                       "betrieblich" (operational, quarter-hourly values). (default: "qualitaetsgesichert")
         """
-        self._check_preconditions(dt_begin, dt.datetime(2011, 12, 31, 23), dt_end)
         return self._basic_read_nt(
-            "onlineHochrechnung/Windonshore", dt_begin, dt_end, transform_dates
+            f"onlinehochrechnung/Windonshore/{product}",
+            dt_begin,
+            dt_end,
+            transform_dates,
         )
 
     def online_hochrechnung_windoffshore(
         self,
-        dt_begin: dt.datetime | None = None,
-        dt_end: dt.datetime | None = None,
+        dt_begin: dt.datetime,
+        dt_end: dt.datetime,
         transform_dates=False,
+        product="qualitaetsgesichert",
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /onlineHochrechnung/Windoffshore.
-        If either dt_begin or dt_end is None, all available data will be queried.
+        Return a pandas Dataframe with data of the endpoint /onlinehochrechnung/Windoffshore/<product>.
+        The endpoint has no query for all data, so dt_begin and dt_end are required.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2011-12-31T23:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2012-12-13T23:00:00 for
+                        "qualitaetsgesichert", 2026-08-31T22:00:00 for "betrieblich")
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
+            product -- "qualitaetsgesichert" (quality assured, hourly values) or
+                       "betrieblich" (operational, quarter-hourly values). (default: "qualitaetsgesichert")
         """
-        self._check_preconditions(dt_begin, dt.datetime(2011, 12, 31, 23), dt_end)
         return self._basic_read_nt(
-            "onlineHochrechnung/Windoffshore", dt_begin, dt_end, transform_dates
+            f"onlinehochrechnung/Windoffshore/{product}",
+            dt_begin,
+            dt_end,
+            transform_dates,
         )
 
     def online_hochrechnung_solar(
         self,
-        dt_begin: dt.datetime | None = None,
-        dt_end: dt.datetime | None = None,
+        dt_begin: dt.datetime,
+        dt_end: dt.datetime,
         transform_dates=False,
+        product="qualitaetsgesichert",
     ):
         """
-        Return a pandas Dataframe with data of the endpoint /onlineHochrechnung/Solar.
-        If either dt_begin or dt_end is None, all available data will be queried.
+        Return a pandas Dataframe with data of the endpoint /onlinehochrechnung/Solar/<product>.
+        The endpoint has no query for all data, so dt_begin and dt_end are required.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2011-12-31T23:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2011-12-31T23:00:00 for
+                        "qualitaetsgesichert", 2026-08-31T22:00:00 for "betrieblich")
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
                                columns "von" and "bis" that contain fully qualified timestamps. (default: False)
+            product -- "qualitaetsgesichert" (quality assured, hourly values) or
+                       "betrieblich" (operational, quarter-hourly values). (default: "qualitaetsgesichert")
         """
-        self._check_preconditions(dt_begin, dt.datetime(2011, 12, 31, 23), dt_end)
         return self._basic_read_nt(
-            "onlineHochrechnung/Solar", dt_begin, dt_end, transform_dates
+            f"onlinehochrechnung/Solar/{product}", dt_begin, dt_end, transform_dates
         )
 
     def prognose_solar(

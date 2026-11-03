@@ -180,7 +180,7 @@ class DienstleistungenClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint /redispatch.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2021-01-01T00:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2020-12-31T23:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
@@ -200,7 +200,7 @@ class DienstleistungenClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint /Kapazitaetsreserve.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2021-01-01T00:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2017-06-02T04:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two
@@ -220,7 +220,7 @@ class DienstleistungenClient(BaseNtClient):
         Return a pandas Dataframe with data of the endpoint /VorhaltungkRD.
         If either dt_begin or dt_end is None, all available data will be queried.
 
-            dt_begin -- datetime object for start of data in UTC (no values before: 2025-01-01T00:00:00)
+            dt_begin -- datetime object for start of data in UTC (no values before: 2025-09-30T22:00:00)
             dt_end -- datetime object for end of data in UTC
             transform_dates -- The data contains times with date, time and timezone in separate columns
                                if this option resolves to "True" the times will be transformed into two

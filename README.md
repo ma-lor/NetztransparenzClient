@@ -66,3 +66,20 @@ von
 2024-12-31 23:30:00+00:00 2024-12-31 23:45:00+00:00           0.0           0.0              0.0              0.0
 2024-12-31 23:45:00+00:00 2025-01-01 00:00:00+00:00           0.0           0.0              0.0              0.0
 ```
+### Endpoints with variants
+The API documents all endpoints in the [API portal](https://api-portal.netztransparenz.de/).
+Some methods take a parameter for the variant of an endpoint:
+
+- `online_hochrechnung_solar`, `online_hochrechnung_windonshore` and `online_hochrechnung_windoffshore`
+  take `product`: `"qualitaetsgesichert"` (default, hourly, since 2011/2012) or `"betrieblich"`
+  (quarter-hourly, since 2026-08-31T22:00 UTC). These endpoints require a timeframe.
+- `anspruch_verguetung_eeg` takes `logic`: `"1hour"` (default), `"2hour"`, `"3hour"`, `"4hour"`,
+  `"6hour"`, `"15minutes"` or `"2cent"`. `anspruch_verguetung_kwkg` takes `"1hour"` (default) or `"15minutes"`.
+  Each variant has its own first data, see the docstrings.
+
+```
+>>> client.anspruch_verguetung_eeg(start, end, transform_dates=True, logic="15minutes")
+```
+
+Requests before the first data of an endpoint raise a `ValueError`, or return an empty dataframe
+with `strict=False`.

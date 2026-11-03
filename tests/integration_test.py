@@ -83,3 +83,39 @@ def test_prognose_solar(client):
 def test_prognose_wind(client):
     result = client.prognose_wind(START, END, True)
     assert result["bis"].count() == QUARTERS_IN_MONTH
+
+
+@pytest.mark.api_access
+def test_online_hochrechnung_betrieblich(client):
+    result = client.online_hochrechnung_solar(
+        dt.datetime(2026, 9, 1), dt.datetime(2026, 9, 2), True, "betrieblich"
+    )
+    assert result["bis"].count() == 24 * 4
+
+
+@pytest.mark.api_access
+def test_anspruch_verguetung_eeg(client):
+    result = client.anspruch_verguetung_eeg(START, END, True, "6hour")
+    assert result["AnspruchVerguetung"].count() == HOURS_IN_MONTH
+
+
+@pytest.mark.api_access
+def test_anspruch_verguetung_kwkg(client):
+    result = client.anspruch_verguetung_kwkg(START, END, True)
+    assert result["AnspruchVerguetung"].count() == HOURS_IN_MONTH
+
+
+@pytest.mark.api_access
+def test_nrvsaldo_minute(client):
+    result = client.nrvsaldo_nrvsaldo_minute_betrieblich(
+        dt.datetime(2026, 9, 1), dt.datetime(2026, 9, 2), True
+    )
+    assert len(result) == 24 * 60
+
+
+@pytest.mark.api_access
+def test_mfrr_satisfied_demand(client):
+    result = client.nrvsaldo_mfrr_satisfied_demand_betrieblich(
+        dt.datetime(2026, 9, 1), dt.datetime(2026, 9, 2), True
+    )
+    assert result["Deutschland (Positiv)"].count() == 24 * 4

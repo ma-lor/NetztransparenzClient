@@ -1,4 +1,5 @@
 import datetime as dt
+import pandas as pd
 import pytest
 
 import netztransparenz as nt
@@ -404,3 +405,36 @@ def test_nrvsaldo_voaa_qualitaetsgesichert(client, requests_mock):
     )
     result = client.nrvsaldo_voaa_qualitaetsgesichert(START, END, True)
     assert result["VoAA (Positiv)"].iloc[0] == 21.69
+
+
+def test_nrvsaldo_mfrr_satisfied_demand_betrieblich(client, requests_mock):
+    body = """Datum;Zeitzone;von;bis;Datenkategorie;Datentyp;Einheit;Deutschland (Positiv);Deutschland (Negativ)
+01.10.2026;UTC;00:00;00:15;mFRRSatisfiedDemand;Betrieblich;MW;12,500;0,000
+"""
+    requests_mock.get(
+        f"{_API_BASE_URL}/data/NrvSaldo/mFRRSatisfiedDemand/Betrieblich/2026-10-01T00:00:00/2026-10-02T00:00:00",
+        text=body,
+    )
+    result = client.nrvsaldo_mfrr_satisfied_demand_betrieblich(
+        dt.datetime(2026, 10, 1), dt.datetime(2026, 10, 2), True
+    )
+    assert result["Deutschland (Positiv)"].iloc[0] == 12.5
+    assert result.index[0] == pd.Timestamp(2026, 10, 1, 0, 0, tz="UTC")
+
+
+def test_nrvsaldo_nrvsaldo_minute_betrieblich(client, requests_mock):
+    body = """Datum;Zeitzone;von;bis;Datenkategorie;Datentyp;Einheit;Deutschland;Status
+01.10.2026;UTC;23:58;23:59;NRV-Saldo minütlich;Betrieblich;MW;566,000;0
+01.10.2026;UTC;23:59;00:00;NRV-Saldo minütlich;Betrieblich;MW;-;0
+"""
+    requests_mock.get(
+        f"{_API_BASE_URL}/data/NrvSaldo/nrvSaldoMinute/Betrieblich/2026-10-01T00:00:00/2026-10-02T00:00:00",
+        text=body,
+    )
+    result = client.nrvsaldo_nrvsaldo_minute_betrieblich(
+        dt.datetime(2026, 10, 1), dt.datetime(2026, 10, 2), True
+    )
+    assert result["Deutschland"].iloc[0] == 566.0
+    # "-" marks a missing value
+    assert pd.isnull(result["Deutschland"].iloc[1])
+    assert result["bis"].iloc[1] == pd.Timestamp(2026, 10, 2, 0, 0, tz="UTC")

@@ -165,6 +165,22 @@ def test_negative_preise_1h(client, requests_mock):
     assert result["Datum"].iloc[0] == pd.Timestamp(2024, 1, 1, 0, 0)
 
 
+def test_negative_preise_2h(client, requests_mock):
+    body = """Datum;Negativ
+2026-01-01 00:00;Ja
+2026-01-01 01:00;Nein"""
+
+    requests_mock.get(
+        f"{_API_BASE_URL}/data/NegativePreise/2/2026-01-01T00:00:00/2026-02-01T00:00:00",
+        text=body,
+    )
+    result = client.negative_preise_2h(
+        dt.datetime(2026, 1, 1, tzinfo=dt.UTC), dt.datetime(2026, 2, 1), True
+    )
+    assert result["Negativ"].iloc[1] == "Nein"
+    assert result["Datum"].iloc[0] == pd.Timestamp(2026, 1, 1, 0, 0)
+
+
 def test_negative_preise_3h(client, requests_mock):
     body = """Datum;Negativ
 2024-01-01 00:00;Ja
@@ -209,16 +225,25 @@ def test_negative_preise_6h(client, requests_mock):
 
 def test_negative_preise_15m(client, requests_mock):
     body = """Datum;Negativ
-2024-01-01 00:00;Ja
-2024-01-01 00:15;Nein"""
+2025-10-01 00:00;Ja
+2025-10-01 00:15;Nein"""
 
     requests_mock.get(
-        f"{_API_BASE_URL}/data/NegativePreise/15/2024-01-01T00:00:00/2024-02-01T00:00:00",
+        f"{_API_BASE_URL}/data/NegativePreise/15/2025-10-01T00:00:00/2025-11-01T00:00:00",
         text=body,
     )
-    result = client.negative_preise_15m(START, END, True)
+    result = client.negative_preise_15m(
+        dt.datetime(2025, 10, 1, tzinfo=dt.UTC), dt.datetime(2025, 11, 1), True
+    )
     assert result["Negativ"].iloc[0] == "Ja"
-    assert result["Datum"].iloc[0] == pd.Timestamp(2024, 1, 1, 0, 0)
+    assert result["Datum"].iloc[0] == pd.Timestamp(2025, 10, 1, 0, 0)
+
+
+def test_negative_preise_before_first_data(client):
+    client.set_strict(False)
+    result = client.negative_preise_15m(START, END, True)
+    assert result.empty
+    assert list(result.columns) == ["Datum", "Negativ"]
 
 
 def test_jahresmarktpraemie(client, requests_mock):
@@ -281,3 +306,57 @@ def test_id_aep(client, requests_mock):
     assert result["bis"].iloc[0] == pd.Timestamp(
         2025, 1, 2, 0, 0, tz="UTC"
     )  # check if day turnover works correctly
+
+
+def test_anspruch_verguetung_eeg(client, requests_mock):
+    body = """Datum;Zeitzone;von;bis;AnspruchVerguetung
+31.12.2025;UTC;23:00;00:00;Ja
+01.01.2026;UTC;00:00;01:00;Nein"""
+
+    requests_mock.get(
+        f"{_API_BASE_URL}/data/anspruchverguetungeeg/2hour/2025-12-31T23:00:00/2026-01-01T01:00:00",
+        text=body,
+    )
+    result = client.anspruch_verguetung_eeg(
+        dt.datetime(2025, 12, 31, 23), dt.datetime(2026, 1, 1, 1), True, "2hour"
+    )
+    assert list(result["AnspruchVerguetung"]) == ["Ja", "Nein"]
+    assert result.index[0] == pd.Timestamp(2025, 12, 31, 23, tz="UTC")
+    # 00:00 as the end of a period is the next day
+    assert result["bis"].iloc[0] == pd.Timestamp(2026, 1, 1, 0, tz="UTC")
+
+
+def test_anspruch_verguetung_kwkg_splits_long_ranges(client, requests_mock):
+    client.set_max_query_distance(dt.timedelta(days=1))
+    for day, answer in ((1, "Ja"), (2, "Nein")):
+        requests_mock.get(
+            f"{_API_BASE_URL}/data/anspruchverguetungkwkg/1hour/2024-01-0{day}T00:00:00/2024-01-0{day + 1}T00:00:00",
+            text=f"""Datum;Zeitzone;von;bis;AnspruchVerguetung
+0{day}.01.2024;UTC;00:00;01:00;{answer}""",
+        )
+    result = client.anspruch_verguetung_kwkg(
+        dt.datetime(2024, 1, 1), dt.datetime(2024, 1, 3), True
+    )
+    assert list(result["AnspruchVerguetung"]) == ["Ja", "Nein"]
+
+
+def test_anspruch_verguetung_unknown_logic(client):
+    with pytest.raises(ValueError):
+        client.anspruch_verguetung_kwkg(START, END, logic="2hour")
+
+
+def test_spotmarktpreise_splits_long_ranges(client, requests_mock):
+    client.set_max_query_distance(dt.timedelta(days=1))
+    for day in (1, 2):
+        requests_mock.get(
+            f"{_API_BASE_URL}/data/Spotmarktpreise/2024-01-0{day}T00:00:00/2024-01-0{day + 1}T00:00:00",
+            text=f"""Datum;von;Zeitzone von;bis;Zeitzone bis;Spotmarktpreis in ct/kWh
+0{day}.01.2024;00:00;UTC;01:00;UTC;7,7""",
+        )
+    result = client.spotmarktpreise(
+        dt.datetime(2024, 1, 1, tzinfo=dt.UTC), dt.datetime(2024, 1, 3), True
+    )
+    assert list(result.index) == [
+        pd.Timestamp(2024, 1, 1, tz="UTC"),
+        pd.Timestamp(2024, 1, 2, tz="UTC"),
+    ]
